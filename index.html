@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Setlists — CRUSH MUSIC</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Ultra&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <style>
@@ -69,36 +69,101 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1rem 0}
 .mgrid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
 
 /* ID BAR */
-.idbar{max-width:960px;margin:.75rem auto 0;padding:0 2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.idbar{max-width:1000px;margin:1.5rem auto 0;padding:.7rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;background:#fff;border:1.5px solid var(--ink);border-radius:99px;width:calc(100% - 4rem);justify-content:center;box-shadow:0 4px 0 var(--border)}
+.idbar-left{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.idbar-tools{display:flex;align-items:center;gap:.5rem}
+.idbar-right{display:flex;align-items:center;gap:.75rem;margin-left:auto}
+@media (max-width:760px){
+  .idbar{border-radius:18px;padding:.85rem 1rem;width:calc(100% - 2rem);gap:.5rem;flex-direction:column;align-items:stretch}
+  .idbar-left,.idbar-tools,.idbar-right{justify-content:center;width:100%}
+  .idbar-right{margin-left:0}
+  .idbar-tools{padding-top:.5rem;padding-bottom:.5rem;border-top:1px dashed var(--border);border-bottom:1px dashed var(--border)}
+}
+.color-edit-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:14px;transition:all .15s;position:relative;overflow:hidden}
+.color-edit-btn:hover{border-color:var(--ink);transform:scale(1.08)}
+.color-edit-btn input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;border:none;background:none;padding:0;width:100%;height:100%}
+
+.theme-btn{padding:5px 12px;border:1.5px solid var(--border);border-radius:99px;background:#fff;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s}
+.theme-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+/* TUNER */
+.tuner-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:1rem}
+.tuner-note{padding:18px 8px;border:2px solid var(--ink);border-radius:14px;background:#fff;cursor:pointer;transition:all .15s;text-align:center;font-family:'DM Serif Display',serif;display:flex;flex-direction:column;align-items:center;gap:4px}
+.tuner-note:hover{background:var(--cream);transform:translateY(-2px)}
+.tuner-note.playing{background:var(--ink);color:var(--cream);border-color:var(--ink);box-shadow:0 0 0 4px rgba(224,152,94,.3)}
+.tuner-note.matched{background:#1D9E75;color:#fff;border-color:#1D9E75;box-shadow:0 0 0 4px rgba(29,158,117,.3)}
+.tuner-note-name{font-size:1.8rem;font-weight:600;line-height:1}
+.tuner-note-hz{font-size:11px;font-family:'DM Sans',sans-serif;color:var(--muted);opacity:.8}
+.tuner-note.playing .tuner-note-hz,.tuner-note.matched .tuner-note-hz{color:rgba(255,255,255,.85)}
+@media (max-width:480px){
+  .tuner-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* TUNER DETECTION */
+.tuner-detect{margin-top:1rem}
+.tuner-display{margin-top:1rem;padding:1.25rem;background:#fff;border:2px solid var(--ink);border-radius:14px}
+.tuner-cents-bar{position:relative;height:36px;background:linear-gradient(90deg,#E24B4A 0%,#E0A540 25%,#1D9E75 45%,#1D9E75 55%,#E0A540 75%,#E24B4A 100%);border-radius:18px;overflow:hidden;margin-bottom:6px}
+.tuner-cents-zone{position:absolute;top:0;left:48%;width:4%;height:100%;background:rgba(255,255,255,.4);border-left:1px solid rgba(0,0,0,.2);border-right:1px solid rgba(0,0,0,.2)}
+.tuner-cents-marker{position:absolute;top:-4px;bottom:-4px;left:50%;width:6px;background:#1A1714;border-radius:3px;transform:translateX(-50%);transition:left .12s ease-out;box-shadow:0 0 0 2px #fff,0 2px 8px rgba(0,0,0,.4)}
+.tuner-cents-tick{position:absolute;top:-2px;bottom:-2px;width:1px;background:rgba(0,0,0,.25);transform:translateX(-50%)}
+.tuner-cents-tick.center{width:2px;background:rgba(0,0,0,.4)}
+.tuner-cents-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:600;padding:0 2px;margin-bottom:1rem}
+.tuner-result{text-align:center;padding-top:.5rem}
+.tuner-note-big{font-family:'DM Serif Display',serif;font-size:3rem;font-weight:600;line-height:1;color:var(--ink);transition:color .15s}
+.tuner-note-big.matched{color:#1D9E75}
+.tuner-note-big.flat{color:#E24B4A}
+.tuner-note-big.sharp{color:#E24B4A}
+.tuner-freq-label{font-size:12px;color:var(--muted);margin-top:4px}
+.tuner-cents-label{font-size:14px;font-weight:600;margin-top:6px;color:var(--muted)}
+.tuner-cents-label.matched{color:#1D9E75}
+.tuner-cents-label.flat,.tuner-cents-label.sharp{color:#E24B4A}
+
+.theme-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:1rem}
+.theme-row:last-of-type{border-bottom:none}
+.theme-row-label{flex:1;min-width:0}
+.theme-row-label strong{display:block;font-size:14px;font-weight:600;color:var(--ink)}
+.theme-row-sub{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.big-swatch{width:48px;height:48px;border-radius:12px;border:2px solid var(--ink);cursor:pointer;position:relative;overflow:hidden;flex-shrink:0;background:conic-gradient(from 0deg,#ff0040,#ff8000,#ffff00,#00ff40,#00ffff,#0040ff,#8000ff,#ff00c0,#ff0040)}
+.big-swatch input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;border:none;width:100%;height:100%;padding:0}
 .idbadge{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border-radius:99px;background:var(--ink);color:var(--cream);font-size:12px;font-weight:500}
 .idbadge .av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
 .chg{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline}
 .sync{width:8px;height:8px;border-radius:50%;background:var(--faint);flex-shrink:0;transition:background .3s}
 .sync.ok{background:var(--green)}.sync.err{background:var(--red)}
-.add-btn{margin-left:auto;padding:5px 14px;border-radius:99px;border:1.5px solid var(--ink);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:var(--ink);transition:all .15s}
-.add-btn:hover{background:var(--ink);color:var(--cream)}
+.add-btn{padding:8px 18px;border-radius:99px;border:none;background:var(--ink);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:var(--cream);transition:all .15s;letter-spacing:.01em;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.add-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.18)}
 
 /* HEADER */
-header{padding:3rem 2rem 2rem;max-width:960px;margin:0 auto;border-bottom:1.5px solid var(--ink);display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-header h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,6vw,3.5rem);line-height:1;letter-spacing:-.02em}
-header p{font-size:13px;color:var(--muted);margin-top:.4rem}
-.stats{display:flex;gap:1.5rem;flex-wrap:wrap}
-.stat{text-align:right}
-.stat-n{font-family:'DM Serif Display',serif;font-size:1.8rem;line-height:1}
-.stat-l{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.07em}
+/* HEADER — block serif vintage avec ombre 3D */
+header{padding:3.5rem 2rem 2.5rem;max-width:1000px;margin:0 auto;border-bottom:1.5px solid var(--ink);text-align:center}
+.header-inner{display:flex;flex-direction:column;align-items:center;gap:.5rem}
+header .kicker{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.32em;color:var(--muted);line-height:1;margin:0}
+header h1{font-family:'Ultra',serif;font-weight:400;font-size:clamp(2.8rem,8vw,5.5rem);line-height:.95;letter-spacing:.005em;color:var(--ink);margin:.4rem 0 .3rem;text-shadow:
+  3px 3px 0 var(--border),
+  6px 6px 0 rgba(0,0,0,.08);
+  text-transform:uppercase}
+header h1 .heart{display:inline-block;font-size:.65em;vertical-align:middle;margin-left:.08em;text-shadow:none;filter:drop-shadow(0 3px 8px rgba(194,24,91,.4));animation:heartbeat 2.5s ease-in-out infinite}
+@keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* STATS — ligne typographique élégante */
+.stats{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:1.5rem;margin-top:1rem;font-family:'Inter',sans-serif}
+.stat{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;padding:0 .25rem}
+.stat + .stat::before{content:'·';position:absolute;left:-1rem;top:50%;transform:translateY(-55%);color:var(--faint);font-size:1.5rem;line-height:1}
+.stat-n{font-family:'Ultra',serif;font-weight:400;font-size:1.6rem;line-height:1;color:var(--ink);letter-spacing:.01em}
+.stat-l{font-family:'Inter',sans-serif;font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.18em}
 
 /* TABS */
-.tabs{max-width:960px;margin:1.5rem auto 0;padding:0 2rem;display:flex;gap:8px;flex-wrap:wrap}
-.tab{position:relative;padding:6px 16px;border-radius:99px;border:1px solid var(--border);background:#fff;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s}
-.tab:hover{border-color:var(--faint);color:var(--ink)}
-.tab.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.tabs{max-width:1000px;margin:1.8rem auto 0;padding:0 2rem;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tab{position:relative;padding:8px 20px;border-radius:99px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif;transition:all .15s;letter-spacing:.01em}
+.tab:hover{border-color:var(--ink);color:var(--ink);transform:translateY(-1px)}
+.tab.on{background:var(--ink);color:var(--cream);border-color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.15)}
 .badge{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center;line-height:1.4}
 
 /* FILTERS */
-.filters{max-width:960px;margin:.75rem auto 0;padding:0 2rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.sep{width:1px;height:18px;background:var(--border);margin:0 2px}
-.fb{padding:5px 14px;border-radius:99px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s}
-.fb:hover{border-color:var(--faint);color:var(--ink)}
+.filters{max-width:1000px;margin:.8rem auto 0;padding:0 2rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+.sep{width:1px;height:18px;background:var(--border);margin:0 4px}
+.fb{padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif;transition:all .15s;letter-spacing:.01em}
+.fb:hover{border-color:var(--ink);color:var(--ink)}
 .fb.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
 .fb.excl-btn{color:#A32D2D;border-color:#F7C1C1;background:#FCEBEB}
 .fb.excl-btn.on{background:var(--red);color:#fff;border-color:var(--red)}
@@ -204,8 +269,10 @@ main{max-width:960px;margin:0 auto;padding:2rem}
 .concert-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1.5px solid var(--ink);flex-wrap:wrap}
 .concert-head h2{font-family:'DM Serif Display',serif;font-size:1.5rem;letter-spacing:-.01em}
 .concert-head p{font-size:12px;color:var(--muted);margin-top:2px}
-.ccard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px;transition:border-color .15s,transform .15s}
+.ccard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px;transition:border-color .15s,transform .15s;position:relative;overflow:hidden}
 .ccard:hover{border-color:var(--ink)}
+.ccard.has-color::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--ccolor)}
+.ccard.has-color{padding-left:24px}
 .ccard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px}
 .ccard-name{font-family:'DM Serif Display',serif;font-size:1.25rem;line-height:1.2;letter-spacing:-.01em}
 .ccard-meta{font-size:12px;color:var(--muted);margin-top:3px}
@@ -213,6 +280,18 @@ main{max-width:960px;margin:0 auto;padding:2rem}
 .ccard-stats strong{color:var(--ink);font-weight:600}
 .ccard-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
 .ccard-date{font-family:'DM Serif Display',serif;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:3px 10px;border:1px solid var(--border);border-radius:99px;background:var(--cream);white-space:nowrap;flex-shrink:0}
+
+/* COLOR PICKER */
+.color-picker{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.color-swatch{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all .15s;padding:0;background:transparent;display:flex;align-items:center;justify-content:center;position:relative}
+.color-swatch:hover{transform:scale(1.08)}
+.color-swatch.selected{border-color:var(--ink);transform:scale(1.1);box-shadow:0 0 0 1px var(--bg)}
+.color-swatch.none{background:#fff;border:2px dashed #ccc;color:var(--faint);font-weight:300;font-size:18px;line-height:1}
+.color-swatch.none.selected{border-style:solid;border-color:var(--ink);color:var(--ink)}
+.color-swatch.custom{background:conic-gradient(from 0deg,#ff0040,#ff8000,#ffff00,#00ff40,#00ffff,#0040ff,#8000ff,#ff00c0,#ff0040);border:2px solid #fff;box-shadow:0 0 0 1px var(--border)}
+.color-swatch.custom span{position:relative;z-index:1;background:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.color-swatch.custom input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;border:none;background:none;padding:0;width:100%;height:100%}
+.color-swatch.custom.selected{box-shadow:0 0 0 1px var(--bg),0 0 0 4px var(--ink)}
 
 /* CONCERT DETAIL */
 .cd-empty{padding:2rem 0;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:10px;background:#fff}
@@ -242,6 +321,36 @@ main{max-width:960px;margin:0 auto;padding:2rem}
 .ccard-top-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
 .ccard-del{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;color:var(--muted);flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center;padding:0}
 .ccard-del:hover{border-color:var(--red);color:var(--red);background:#FCEBEB}
+
+/* PROMPTER */
+.prompter{position:fixed;inset:0;background:#0a0a0a;color:#f5f0e8;z-index:1000;display:flex;flex-direction:column}
+.prompter-controls{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:rgba(20,20,20,.95);border-bottom:1px solid #333;flex-wrap:wrap}
+.prompter-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:#f5f0e8;margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30%}
+.prompter-btn{background:transparent;border:1px solid #555;color:#f5f0e8;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px;transition:all .15s}
+.prompter-btn:hover{background:#222;border-color:#888}
+.prompter-ctrl-group{display:flex;align-items:center}
+.prompter-ctrl-group label{display:flex;align-items:center;gap:8px;color:#ccc;font-size:13px}
+.prompter-ctrl-group input[type=range]{width:120px;accent-color:#E0985E;cursor:pointer}
+.prompter-ctrl-group span{font-size:14px;min-width:30px;text-align:center;color:#aaa}
+.prompter-play{background:#E0985E;color:#0a0a0a;border:none;width:54px;height:54px;border-radius:50%;cursor:pointer;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;padding:0}
+.prompter-play:hover{transform:scale(1.06);box-shadow:0 0 20px rgba(224,152,94,.5)}
+.prompter-play.playing{background:#E24B4A}
+.prompter-tabs{display:flex;gap:6px;padding:.6rem 1.2rem;background:rgba(15,15,15,.95);border-bottom:1px solid #2a2a2a;overflow-x:auto;flex-wrap:nowrap}
+.prompter-tabs::-webkit-scrollbar{display:none}
+.prompter-tab{background:transparent;border:1px solid #444;color:#999;padding:6px 14px;border-radius:99px;cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.prompter-tab:hover{border-color:#888;color:#f5f0e8}
+.prompter-tab.active{background:#E0985E;border-color:#E0985E;color:#0a0a0a;font-weight:600}
+.prompter-content{flex:1;overflow-y:auto;cursor:pointer}
+.prompter-content::-webkit-scrollbar{display:none}
+.prompter-text{padding:80vh 8% 80vh;font-family:'DM Serif Display',serif;line-height:1.6;font-weight:500;letter-spacing:.01em;white-space:pre-wrap;text-align:center;color:#f5f0e8;text-shadow:0 0 12px rgba(245,240,232,.1)}
+.prompter-text.chord{font-family:'JetBrains Mono','Courier New',monospace;text-align:left;font-weight:400;letter-spacing:0;line-height:1.7}
+@media (max-width:768px){
+  .prompter-controls{padding:.6rem .8rem;gap:.6rem}
+  .prompter-title{display:none}
+  .prompter-ctrl-group input[type=range]{width:80px}
+  .prompter-play{width:46px;height:46px;font-size:18px}
+  .prompter-tabs{padding:.4rem .8rem}
+}
 
 /* TRACK PICKER */
 .picker-top{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
@@ -324,7 +433,12 @@ footer p{font-size:11px;color:var(--faint)}
       <div class="fr"><label class="lbl">Artiste *</label><input class="inp" id="f-artist" type="text" placeholder="ex: The Weeknd" autocomplete="off"></div>
     </div>
     <div class="fg">
-      <div class="fr"><label class="lbl">Durée</label><input class="inp" id="f-dur" type="text" placeholder="ex: 3:50" maxlength="8"></div>
+      <div class="fr"><label class="lbl">Durée</label>
+        <div style="display:flex;gap:6px">
+          <input class="inp" id="f-dur" type="text" placeholder="ex: 3:50" maxlength="8" style="flex:1">
+          <button type="button" class="btn sm" id="f-dur-find" onclick="autoFindDuration('f-title','f-artist','f-dur')" title="Trouver la durée automatiquement" style="padding:0 12px;font-size:14px">🔍</button>
+        </div>
+      </div>
       <div class="fr"><label class="lbl">Style</label>
         <div style="display:flex;gap:6px">
           <select class="sel" id="f-style" style="flex:1"></select>
@@ -360,7 +474,12 @@ footer p{font-size:11px;color:var(--faint)}
       <div class="fr"><label class="lbl">Artiste *</label><input class="inp" id="e-artist" type="text" autocomplete="off"></div>
     </div>
     <div class="fg">
-      <div class="fr"><label class="lbl">Durée</label><input class="inp" id="e-dur" type="text" maxlength="8"></div>
+      <div class="fr"><label class="lbl">Durée</label>
+        <div style="display:flex;gap:6px">
+          <input class="inp" id="e-dur" type="text" maxlength="8" style="flex:1">
+          <button type="button" class="btn sm" id="e-dur-find" onclick="autoFindDuration('e-title','e-artist','e-dur')" title="Trouver la durée automatiquement" style="padding:0 12px;font-size:14px">🔍</button>
+        </div>
+      </div>
       <div class="fr"><label class="lbl">Style</label>
         <div style="display:flex;gap:6px">
           <select class="sel" id="e-style" style="flex:1"></select>
@@ -407,10 +526,38 @@ footer p{font-size:11px;color:var(--faint)}
     <div class="save-row">
       <button class="btn pri" style="flex:none;padding:10px 22px" onclick="savePart()">Sauvegarder</button>
       <button class="pdf-btn" onclick="exportPartitionPDF()">📥 Télécharger le PDF</button>
+      <button class="btn" onclick="openPrompter()" id="pt-prompter-btn">🎤 Mode prompteur</button>
       <span id="pt-status"></span>
       <span class="upd" id="pt-upd"></span>
       <button class="btn" style="margin-left:auto" onclick="closePart()">Fermer</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL PROMPTEUR (paroles défilantes plein écran) -->
+<div class="prompter" id="prompter-ov" style="display:none">
+  <div class="prompter-controls">
+    <button class="prompter-btn" onclick="closePrompter()" title="Fermer">✕</button>
+    <div class="prompter-title" id="prompter-title"></div>
+    <div class="prompter-ctrl-group">
+      <label title="Taille du texte">
+        <span>Aa</span>
+        <input type="range" id="prompter-fontsize" min="18" max="80" value="36" step="2">
+        <span id="prompter-fontsize-val">36px</span>
+      </label>
+    </div>
+    <div class="prompter-ctrl-group">
+      <label title="Vitesse de défilement">
+        <span>🚶</span>
+        <input type="range" id="prompter-speed" min="0" max="100" value="35">
+        <span>🏃</span>
+      </label>
+    </div>
+    <button class="prompter-play" id="prompter-play" onclick="togglePrompter()" title="Lire/Pause">▶</button>
+  </div>
+  <div class="prompter-tabs" id="prompter-tabs"></div>
+  <div class="prompter-content" id="prompter-content">
+    <div class="prompter-text" id="prompter-text"></div>
   </div>
 </div>
 
@@ -449,6 +596,10 @@ footer p{font-size:11px;color:var(--faint)}
       <div class="fr"><label class="lbl">Date</label><input class="inp" id="c-date" type="date"></div>
       <div class="fr"><label class="lbl">Lieu</label><input class="inp" id="c-venue" type="text" placeholder="ex: Paris, Le Petit Bain" autocomplete="off"></div>
     </div>
+    <div class="fr">
+      <label class="lbl">Couleur de la setlist <span style="color:var(--faint);font-weight:400">(optionnel)</span></label>
+      <div class="color-picker" id="c-color-picker"></div>
+    </div>
     <p class="err" id="c-err">Le nom du concert est obligatoire</p>
     <div class="fa">
       <button class="btn" onclick="closeConcertModal()">Annuler</button>
@@ -459,8 +610,8 @@ footer p{font-size:11px;color:var(--faint)}
 
 <!-- MODAL CONCERT DETAIL -->
 <div class="ov" id="cdetail-ov" style="display:none">
-  <div class="box wide">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:1rem">
+  <div class="box wide" id="cdetail-box">
+    <div class="cdetail-header" id="cd-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:1rem;padding-bottom:.8rem;border-bottom:3px solid transparent">
       <div>
         <h2 id="cd-name"></h2>
         <p class="sub" id="cd-meta" style="margin-bottom:0"></p>
@@ -495,15 +646,152 @@ footer p{font-size:11px;color:var(--faint)}
 
 <!-- PAGE -->
 <header>
-  <div><h1>Setlists</h1><p>CRUSH MUSIC 💜</p></div>
-  <div class="stats" id="stats"></div>
+  <div class="header-inner">
+    <p class="kicker">— Les setlists du duo —</p>
+    <h1>CRUSH MUSIC <span class="heart">💜</span></h1>
+    <div class="stats" id="stats"></div>
+  </div>
 </header>
 
 <div class="idbar" id="idbar" style="display:none">
-  <div class="idbadge" id="idbadge"></div>
-  <span class="chg" onclick="openMo()">changer</span>
-  <div class="sync" id="sync"></div>
-  <button class="add-btn" onclick="openAdd()">+ Ajouter un titre</button>
+  <div class="idbar-left">
+    <div class="idbadge" id="idbadge"></div>
+    <label class="color-edit-btn" title="Changer ma couleur">
+      🎨
+      <input type="color" id="my-color-input" oninput="changeMyColor(this.value)">
+    </label>
+    <span class="chg" onclick="openMo()">changer</span>
+  </div>
+  <div class="idbar-tools">
+    <button class="theme-btn" id="theme-btn" onclick="openThemeModal()" style="display:none" title="Personnaliser l'apparence">⚙️ Apparence</button>
+    <button class="theme-btn" onclick="openTuner()" title="Accordeur guitare/basse">🎸 Accordeur</button>
+  </div>
+  <div class="idbar-right">
+    <div class="sync" id="sync"></div>
+    <button class="add-btn" onclick="openAdd()">+ Ajouter un titre</button>
+  </div>
+</div>
+
+<!-- MODAL ACCORDEUR -->
+<div class="ov" id="tuner-ov" style="display:none">
+  <div class="box">
+    <h2>🎸 Accordeur</h2>
+    <p class="sub">Joue une corde et l'app détecte si elle est accordée</p>
+
+    <div class="fr">
+      <label class="lbl">Instrument</label>
+      <select class="sel" id="tuner-instrument" onchange="renderTunerNotes()">
+        <option value="guitar">🎸 Guitare standard (6 cordes)</option>
+        <option value="bass4">🎸 Basse 4 cordes</option>
+        <option value="bass5">🎸 Basse 5 cordes</option>
+        <option value="ukulele">🎵 Ukulélé (4 cordes)</option>
+      </select>
+    </div>
+
+    <!-- Détection automatique -->
+    <div class="tuner-detect" id="tuner-detect">
+      <button class="btn pri" id="tuner-mic-btn" onclick="toggleTunerMic()" style="width:100%;padding:14px;font-size:14px">🎙️ Activer la détection automatique</button>
+      <div class="tuner-display" id="tuner-display" style="display:none">
+        <div class="tuner-cents-bar">
+          <div class="tuner-cents-zone"></div>
+          <div class="tuner-cents-marker" id="tuner-cents-marker"></div>
+          <div class="tuner-cents-tick" style="left:0%"></div>
+          <div class="tuner-cents-tick" style="left:25%"></div>
+          <div class="tuner-cents-tick center" style="left:50%"></div>
+          <div class="tuner-cents-tick" style="left:75%"></div>
+          <div class="tuner-cents-tick" style="left:100%"></div>
+        </div>
+        <div class="tuner-cents-labels">
+          <span>-50¢</span><span>-25¢</span><span>Juste</span><span>+25¢</span><span>+50¢</span>
+        </div>
+        <div class="tuner-result">
+          <div class="tuner-note-big" id="tuner-note-detected">—</div>
+          <div class="tuner-freq-label" id="tuner-freq-detected">Joue une note...</div>
+          <div class="tuner-cents-label" id="tuner-cents-label"></div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin:1rem 0 .5rem">— ou clique sur une note pour l'entendre —</p>
+    <div class="tuner-grid" id="tuner-notes"></div>
+    <p id="tuner-load-status" style="font-size:11px;text-align:center;margin-top:.8rem;color:var(--muted);min-height:14px"></p>
+
+    <div class="fa" style="margin-top:1rem">
+      <button class="btn" onclick="closeTuner()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THÈME / APPARENCE -->
+<div class="ov" id="theme-ov" style="display:none">
+  <div class="box">
+    <h2>🎨 Personnaliser l'apparence</h2>
+    <p class="sub">Ces couleurs s'appliquent pour tout le monde sur l'app</p>
+
+    <div class="theme-row">
+      <div class="theme-row-label">
+        <strong>Fond du site</strong>
+        <span class="theme-row-sub">La couleur générale du site</span>
+      </div>
+      <label class="big-swatch" id="theme-bg-swatch">
+        <input type="color" id="theme-bg" value="#FAF7F2">
+      </label>
+    </div>
+
+    <div class="theme-row">
+      <div class="theme-row-label">
+        <strong>Couleur d'accent</strong>
+        <span class="theme-row-sub">Pour les titres et boutons importants</span>
+      </div>
+      <label class="big-swatch" id="theme-accent-swatch">
+        <input type="color" id="theme-accent" value="#1A1714">
+      </label>
+    </div>
+
+    <div class="theme-row">
+      <div class="theme-row-label">
+        <strong>LOUNGE</strong>
+        <span class="theme-row-sub">Couleur principale du titre/trait</span>
+      </div>
+      <label class="big-swatch" id="theme-lounge-swatch">
+        <input type="color" id="theme-lounge" value="#8B6F47">
+      </label>
+    </div>
+    <div class="theme-row" style="padding-top:0;border-top:none;padding-left:1.5rem;border-left:2px solid var(--border);margin-left:.5rem">
+      <div class="theme-row-label">
+        <strong>↳ Tranche LOUNGE</strong>
+        <span class="theme-row-sub">Le fond de la pastille à côté du morceau</span>
+      </div>
+      <label class="big-swatch" id="theme-loungeBg-swatch">
+        <input type="color" id="theme-loungeBg" value="#F4ECDB">
+      </label>
+    </div>
+
+    <div class="theme-row">
+      <div class="theme-row-label">
+        <strong>CLUB</strong>
+        <span class="theme-row-sub">Couleur principale du titre/trait</span>
+      </div>
+      <label class="big-swatch" id="theme-club-swatch">
+        <input type="color" id="theme-club" value="#C2185B">
+      </label>
+    </div>
+    <div class="theme-row" style="padding-top:0;border-top:none;padding-left:1.5rem;border-left:2px solid var(--border);margin-left:.5rem">
+      <div class="theme-row-label">
+        <strong>↳ Tranche CLUB</strong>
+        <span class="theme-row-sub">Le fond de la pastille à côté du morceau</span>
+      </div>
+      <label class="big-swatch" id="theme-clubBg-swatch">
+        <input type="color" id="theme-clubBg" value="#FBDDE9">
+      </label>
+    </div>
+
+    <div class="fa" style="margin-top:1.5rem">
+      <button class="btn" onclick="resetTheme()">Réinitialiser</button>
+      <button class="btn" onclick="closeThemeModal()">Annuler</button>
+      <button class="btn pri" onclick="saveTheme()">Appliquer</button>
+    </div>
+  </div>
 </div>
 
 <div class="tabs" id="tabs"></div>
@@ -776,15 +1064,834 @@ function applyMe(m){
   if(!m.set) m.set = setKeyFor(m.name);
   me = m;
   saveMe(m);
-  if(!CORE.find(c=>c.name===m.name)){
-    set(ref(db,'members/'+fbk(m.name)), m);
-  }
+  // Toujours sauver en DB pour pouvoir override la couleur des CORE members
+  set(ref(db,'members/'+fbk(m.name)), m);
   document.getElementById('mo-ov').style.display = 'none';
   document.getElementById('idbar').style.display = 'flex';
   document.getElementById('idbadge').innerHTML =
     '<div class="av" style="background:'+m.color+'">'+m.initials+'</div>'+esc(m.name);
+  const colorInput = document.getElementById('my-color-input');
+  if(colorInput) colorInput.value = m.color;
+  // Bouton "Apparence" visible seulement pour les admins
+  const themeBtn = document.getElementById('theme-btn');
+  if(themeBtn) themeBtn.style.display = isAdmin() ? '' : 'none';
   rebuild();
 }
+
+// Changer ma couleur (via l'icône 🎨 dans l'idbar)
+window.changeMyColor = function(newColor){
+  if(!me || !newColor) return;
+  me.color = newColor;
+  saveMe(me);
+  set(ref(db,'members/'+fbk(me.name)), me);
+  // Mettre à jour le badge tout de suite
+  document.getElementById('idbadge').innerHTML =
+    '<div class="av" style="background:'+me.color+'">'+me.initials+'</div>'+esc(me.name);
+  rebuild();
+};
+
+// ── ACCORDEUR (Web Audio API) ────────────────────────────────
+const TUNER_INSTRUMENTS = {
+  guitar: {
+    label: 'Guitare standard',
+    notes: [
+      {name:'E',  octave:2, freq:82.41,  display:'Mi grave'},
+      {name:'A',  octave:2, freq:110.00, display:'La'},
+      {name:'D',  octave:3, freq:146.83, display:'Ré'},
+      {name:'G',  octave:3, freq:196.00, display:'Sol'},
+      {name:'B',  octave:3, freq:246.94, display:'Si'},
+      {name:'E',  octave:4, freq:329.63, display:'Mi aigu'},
+    ],
+  },
+  bass4: {
+    label: 'Basse 4 cordes',
+    notes: [
+      {name:'E',  octave:1, freq:41.20,  display:'Mi'},
+      {name:'A',  octave:1, freq:55.00,  display:'La'},
+      {name:'D',  octave:2, freq:73.42,  display:'Ré'},
+      {name:'G',  octave:2, freq:98.00,  display:'Sol'},
+    ],
+  },
+  bass5: {
+    label: 'Basse 5 cordes',
+    notes: [
+      {name:'B',  octave:0, freq:30.87,  display:'Si grave'},
+      {name:'E',  octave:1, freq:41.20,  display:'Mi'},
+      {name:'A',  octave:1, freq:55.00,  display:'La'},
+      {name:'D',  octave:2, freq:73.42,  display:'Ré'},
+      {name:'G',  octave:2, freq:98.00,  display:'Sol'},
+    ],
+  },
+  ukulele: {
+    label: 'Ukulélé',
+    notes: [
+      {name:'G',  octave:4, freq:392.00, display:'Sol'},
+      {name:'C',  octave:4, freq:261.63, display:'Do'},
+      {name:'E',  octave:4, freq:329.63, display:'Mi'},
+      {name:'A',  octave:4, freq:440.00, display:'La'},
+    ],
+  },
+};
+
+let _tunerAudioCtx = null;
+let _tunerCurrentNote = null; // {oscs:[], gainNode, freq}
+
+function getTunerCtx(){
+  if(!_tunerAudioCtx){
+    _tunerAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return _tunerAudioCtx;
+}
+
+// ── ACCORDEUR : son de guitare acoustique réel (Tone.js + samples CDN) ──
+// Lazy-load Tone.js + les samples seulement quand on ouvre l'accordeur,
+// pour ne pas ralentir l'ouverture de l'app principale.
+let _toneSampler = null;
+let _toneLoadPromise = null;
+let _toneLoadStatus = 'idle'; // 'idle' | 'loading' | 'loaded' | 'failed'
+
+async function loadToneSampler(){
+  if(_toneSampler) return _toneSampler;
+  if(_toneLoadPromise) return _toneLoadPromise;
+
+  _toneLoadStatus = 'loading';
+  updateTunerLoadStatus();
+
+  _toneLoadPromise = (async () => {
+    // Charger Tone.js depuis le CDN si pas déjà présent
+    if(typeof Tone === 'undefined'){
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js';
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Tone.js load failed'));
+        document.head.appendChild(script);
+      });
+    }
+    // Créer le sampler avec les samples de guitare acoustique réels
+    const sampler = new Tone.Sampler({
+      urls: {
+        'A2': 'A2.ogg',
+        'A3': 'A3.ogg',
+        'A4': 'A4.ogg',
+        'C3': 'C3.ogg',
+        'C4': 'C4.ogg',
+        'C5': 'C5.ogg',
+        'E2': 'E2.ogg',
+        'E3': 'E3.ogg',
+        'E4': 'E4.ogg',
+        'G2': 'G2.ogg',
+        'G3': 'G3.ogg',
+        'G4': 'G4.ogg',
+      },
+      baseUrl: 'https://cdn.jsdelivr.net/npm/tonejs-instrument-guitar-acoustic-ogg/',
+      release: 1,
+    }).toDestination();
+    await Tone.loaded();
+    _toneSampler = sampler;
+    _toneLoadStatus = 'loaded';
+    updateTunerLoadStatus();
+    return sampler;
+  })().catch(err => {
+    console.warn('Tone.js sampler failed to load:', err);
+    _toneLoadStatus = 'failed';
+    updateTunerLoadStatus();
+    _toneLoadPromise = null; // permettre de réessayer
+    throw err;
+  });
+
+  return _toneLoadPromise;
+}
+
+function updateTunerLoadStatus(){
+  const el = document.getElementById('tuner-load-status');
+  if(!el) return;
+  if(_toneLoadStatus === 'loading'){
+    el.textContent = '⏳ Chargement des samples de guitare...';
+    el.style.color = 'var(--muted)';
+  } else if(_toneLoadStatus === 'loaded'){
+    el.textContent = '🎸 Samples de guitare acoustique chargés';
+    el.style.color = '#1D9E75';
+  } else if(_toneLoadStatus === 'failed'){
+    el.textContent = '⚠️ Samples non chargés (son synthétisé)';
+    el.style.color = '#E0985E';
+  } else {
+    el.textContent = '';
+  }
+}
+
+// Convertir une fréquence en nom de note Scientific Pitch Notation (ex: 110 Hz → "A2")
+function frequencyToNoteName(freq){
+  const noteNumber = 12 * Math.log2(freq / 440) + 69;
+  const rounded = Math.round(noteNumber);
+  const noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const noteIdx = ((rounded % 12) + 12) % 12;
+  const octave = Math.floor(rounded / 12) - 1;
+  return noteNames[noteIdx] + octave;
+}
+
+function stopTunerNote(){
+  if(!_tunerCurrentNote) return;
+  // Mode Tone.js sampler : release la note
+  if(_tunerCurrentNote.useSampler && _toneSampler){
+    try { _toneSampler.releaseAll(); } catch(e){}
+  }
+  // Mode fallback Karplus-Strong : fade out le gain et stop les oscillateurs
+  else if(_tunerCurrentNote.gainNode && _tunerCurrentNote.oscs){
+    const ctx = getTunerCtx();
+    const now = ctx.currentTime;
+    try {
+      _tunerCurrentNote.gainNode.gain.cancelScheduledValues(now);
+      _tunerCurrentNote.gainNode.gain.setValueAtTime(_tunerCurrentNote.gainNode.gain.value, now);
+      _tunerCurrentNote.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+      _tunerCurrentNote.oscs.forEach(osc => {
+        try { osc.stop(now + 0.12); } catch(e){}
+      });
+    } catch(e){}
+  }
+  _tunerCurrentNote = null;
+  document.querySelectorAll('.tuner-note.playing').forEach(b => b.classList.remove('playing'));
+}
+
+async function playTunerNote(freq){
+  // Reprendre le contexte si suspendu
+  const ctx = getTunerCtx();
+  if(ctx.state === 'suspended') await ctx.resume();
+
+  // Essayer le sampler Tone.js (vrai son de guitare acoustique)
+  try {
+    const sampler = await loadToneSampler();
+    if(typeof Tone !== 'undefined' && Tone.context.state === 'suspended'){
+      await Tone.start();
+    }
+    const noteName = frequencyToNoteName(freq);
+    sampler.triggerAttack(noteName);
+    _tunerCurrentNote = { useSampler: true, noteName, freq };
+    return;
+  } catch(e){
+    // Fallback : Karplus-Strong synthesis
+  }
+  playTunerNoteFallback(freq);
+}
+
+// Fallback Karplus-Strong utilisé si Tone.js n'est pas chargeable (offline, etc.)
+function playTunerNoteFallback(freq){
+  const ctx = getTunerCtx();
+  if(ctx.state === 'suspended') ctx.resume();
+  const sampleRate = ctx.sampleRate;
+  const duration = 5;
+  const periodSamples = Math.max(2, Math.round(sampleRate / freq));
+  const totalSamples = Math.floor(sampleRate * duration);
+
+  const buf = new Float32Array(totalSamples);
+  for(let i=0; i<periodSamples; i++){
+    buf[i] = (Math.random()*2 - 1) * 0.5;
+  }
+  const decay = 0.997;
+  for(let i=periodSamples; i<totalSamples; i++){
+    const a = buf[i - periodSamples];
+    const b = (i - periodSamples - 1 >= 0) ? buf[i - periodSamples - 1] : a;
+    buf[i] = decay * 0.5 * (a + b);
+  }
+  const audioBuffer = ctx.createBuffer(1, totalSamples, sampleRate);
+  audioBuffer.copyToChannel(buf, 0);
+
+  const source = ctx.createBufferSource();
+  source.buffer = audioBuffer;
+
+  const lowPass = ctx.createBiquadFilter();
+  lowPass.type = 'lowpass';
+  lowPass.frequency.value = Math.max(2000, freq * 6);
+
+  const masterGain = ctx.createGain();
+  masterGain.gain.value = 0.5;
+
+  source.connect(lowPass).connect(masterGain).connect(ctx.destination);
+
+  const now = ctx.currentTime;
+  source.start(now);
+  _tunerCurrentNote = { oscs: [source], gainNode: masterGain, freq };
+}
+
+function renderTunerNotes(){
+  const instrumentKey = document.getElementById('tuner-instrument').value;
+  const instr = TUNER_INSTRUMENTS[instrumentKey];
+  const wrap = document.getElementById('tuner-notes');
+  wrap.innerHTML = '';
+  // Ordre inversé pour avoir les graves en bas (comme sur une guitare)
+  instr.notes.slice().reverse().forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'tuner-note';
+    btn.dataset.freq = n.freq;
+    btn.innerHTML = '<div class="tuner-note-name">'+n.name+(n.octave)+'</div>'
+                   +'<div style="font-size:12px;color:var(--muted);font-family:\'DM Sans\',sans-serif">'+n.display+'</div>'
+                   +'<div class="tuner-note-hz">'+n.freq.toFixed(2)+' Hz</div>';
+    btn.addEventListener('click', () => {
+      const wasPlaying = btn.classList.contains('playing');
+      stopTunerNote();
+      if(!wasPlaying){
+        playTunerNote(n.freq);
+        btn.classList.add('playing');
+      }
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+window.openTuner = function(){
+  renderTunerNotes();
+  document.getElementById('tuner-ov').style.display = 'flex';
+  // Pré-charger le sampler en arrière-plan dès l'ouverture du modal
+  loadToneSampler().catch(()=>{});
+  updateTunerLoadStatus();
+};
+window.closeTuner = function(){
+  stopTunerNote();
+  stopTunerMic();
+  document.getElementById('tuner-ov').style.display = 'none';
+};
+
+document.getElementById('tuner-ov').addEventListener('click', e => {
+  if(e.target === document.getElementById('tuner-ov')) closeTuner();
+});
+
+// ── DÉTECTION AUTOMATIQUE DE NOTES (microphone) ──────────────
+let _micStream = null;
+let _micAnalyser = null;
+let _micAnimId = null;
+let _micBuffer = null;
+
+// Algorithme d'autocorrélation (Chris Wilson's implementation, éprouvée)
+function autoCorrelate(buf, sampleRate){
+  const SIZE = buf.length;
+  let rms = 0;
+  for(let i=0;i<SIZE;i++){ rms += buf[i]*buf[i]; }
+  rms = Math.sqrt(rms/SIZE);
+  if(rms < 0.01) return -1; // signal trop faible
+
+  // Trouve la zone où le signal commence à dépasser un seuil
+  let r1=0, r2=SIZE-1, thres=0.2;
+  for(let i=0;i<SIZE/2;i++){
+    if(Math.abs(buf[i]) < thres){ r1 = i; break; }
+  }
+  for(let i=1;i<SIZE/2;i++){
+    if(Math.abs(buf[SIZE-i]) < thres){ r2 = SIZE-i; break; }
+  }
+  buf = buf.slice(r1, r2);
+  const newSize = buf.length;
+
+  const c = new Float32Array(newSize).fill(0);
+  for(let i=0;i<newSize;i++){
+    for(let j=0;j<newSize-i;j++){
+      c[i] = c[i] + buf[j]*buf[j+i];
+    }
+  }
+
+  let d=0; while(c[d] > c[d+1]) d++;
+  let maxval=-1, maxpos=-1;
+  for(let i=d;i<newSize;i++){
+    if(c[i] > maxval){ maxval = c[i]; maxpos = i; }
+  }
+  let T0 = maxpos;
+  if(T0 < 1) return -1;
+
+  // Interpolation parabolique pour la précision
+  const x1=c[T0-1], x2=c[T0], x3=c[T0+1];
+  const a = (x1 + x3 - 2*x2)/2;
+  const b = (x3 - x1)/2;
+  if(a) T0 = T0 - b/(2*a);
+
+  return sampleRate / T0;
+}
+
+const NOTE_NAMES = ['Do','Do#','Ré','Ré#','Mi','Fa','Fa#','Sol','Sol#','La','La#','Si'];
+// NB: noteNames index 0 = C, 1 = C#, etc.
+
+function frequencyToNote(freq){
+  if(freq <= 0) return null;
+  // MIDI note number : A4 (La 4) = 440 Hz = MIDI 69
+  const noteNumber = 12 * Math.log2(freq / 440) + 69;
+  const rounded = Math.round(noteNumber);
+  const cents = Math.round((noteNumber - rounded) * 100);
+  const noteIdx = ((rounded % 12) + 12) % 12;
+  const octave = Math.floor(rounded / 12) - 1;
+  // Aussi format anglais (E, A, D...) pour comparer avec les notes des instruments
+  const englishNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return {
+    nameFr: NOTE_NAMES[noteIdx],
+    nameEn: englishNames[noteIdx],
+    octave,
+    cents,
+    freq,
+  };
+}
+
+window.toggleTunerMic = async function(){
+  if(_micStream){
+    stopTunerMic();
+  } else {
+    await startTunerMic();
+  }
+};
+
+async function startTunerMic(){
+  try {
+    _micStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        autoGainControl: false,
+        noiseSuppression: false,
+      }
+    });
+  } catch(e){
+    alert('Impossible d\'accéder au micro 😕\n\n'+
+          'Vérifie que tu as autorisé l\'accès au microphone dans ton navigateur. '+
+          'Sur iPhone/Safari : Réglages > Safari > Microphone.');
+    return;
+  }
+  const ctx = getTunerCtx();
+  if(ctx.state === 'suspended') await ctx.resume();
+
+  const source = ctx.createMediaStreamSource(_micStream);
+  _micAnalyser = ctx.createAnalyser();
+  _micAnalyser.fftSize = 4096;
+  source.connect(_micAnalyser);
+  _micBuffer = new Float32Array(_micAnalyser.fftSize);
+
+  // Update UI
+  document.getElementById('tuner-mic-btn').innerHTML = '⏹ Arrêter la détection';
+  document.getElementById('tuner-mic-btn').classList.remove('pri');
+  document.getElementById('tuner-display').style.display = 'block';
+
+  // Démarre la boucle d'analyse
+  detectPitchLoop();
+}
+
+function stopTunerMic(){
+  if(_micAnimId){ cancelAnimationFrame(_micAnimId); _micAnimId = null; }
+  if(_micStream){
+    _micStream.getTracks().forEach(t => t.stop());
+    _micStream = null;
+  }
+  _micAnalyser = null;
+  // Update UI
+  const btn = document.getElementById('tuner-mic-btn');
+  if(btn){
+    btn.innerHTML = '🎙️ Activer la détection automatique';
+    btn.classList.add('pri');
+  }
+  const disp = document.getElementById('tuner-display');
+  if(disp) disp.style.display = 'none';
+  // Reset les boutons de notes
+  document.querySelectorAll('.tuner-note.matched').forEach(b => b.classList.remove('matched'));
+}
+
+// Smoothing pour éviter les sauts visuels
+let _recentFreqs = [];
+
+function detectPitchLoop(){
+  if(!_micAnalyser) return;
+  _micAnalyser.getFloatTimeDomainData(_micBuffer);
+  const freq = autoCorrelate(_micBuffer, getTunerCtx().sampleRate);
+
+  if(freq > 0){
+    // Lissage : moyenne des 3 dernières détections
+    _recentFreqs.push(freq);
+    if(_recentFreqs.length > 4) _recentFreqs.shift();
+    const avgFreq = _recentFreqs.reduce((a,b)=>a+b, 0) / _recentFreqs.length;
+    updateTunerDisplay(avgFreq);
+  } else {
+    _recentFreqs = [];
+    // Pas de signal : afficher le placeholder
+    const noteEl = document.getElementById('tuner-note-detected');
+    const freqEl = document.getElementById('tuner-freq-detected');
+    const centsEl = document.getElementById('tuner-cents-label');
+    if(noteEl) { noteEl.textContent = '—'; noteEl.className = 'tuner-note-big'; }
+    if(freqEl) freqEl.textContent = 'Joue une note...';
+    if(centsEl) { centsEl.textContent = ''; centsEl.className = 'tuner-cents-label'; }
+    // Curseur au centre
+    const marker = document.getElementById('tuner-cents-marker');
+    if(marker) marker.style.left = '50%';
+    // Reset les boutons matched
+    document.querySelectorAll('.tuner-note.matched').forEach(b => b.classList.remove('matched'));
+  }
+  _micAnimId = requestAnimationFrame(detectPitchLoop);
+}
+
+function updateTunerDisplay(freq){
+  const note = frequencyToNote(freq);
+  if(!note) return;
+
+  const noteEl = document.getElementById('tuner-note-detected');
+  const freqEl = document.getElementById('tuner-freq-detected');
+  const centsEl = document.getElementById('tuner-cents-label');
+  const marker = document.getElementById('tuner-cents-marker');
+
+  noteEl.textContent = note.nameFr + (note.octave);
+  freqEl.textContent = freq.toFixed(1) + ' Hz';
+
+  // Position du curseur : -50 cents = 0%, 0 cents = 50%, +50 cents = 100%
+  const pos = Math.max(0, Math.min(100, 50 + note.cents));
+  marker.style.left = pos + '%';
+
+  // Codage couleur
+  const absCents = Math.abs(note.cents);
+  if(absCents <= 5){
+    noteEl.className = 'tuner-note-big matched';
+    centsEl.className = 'tuner-cents-label matched';
+    centsEl.textContent = '✓ Accordé !';
+  } else if(note.cents < 0){
+    noteEl.className = 'tuner-note-big flat';
+    centsEl.className = 'tuner-cents-label flat';
+    centsEl.textContent = '↑ Trop grave (' + note.cents + '¢)';
+  } else {
+    noteEl.className = 'tuner-note-big sharp';
+    centsEl.className = 'tuner-cents-label sharp';
+    centsEl.textContent = '↓ Trop aigu (+' + note.cents + '¢)';
+  }
+
+  // Mettre en surbrillance la corde correspondante (si elle existe pour l'instrument)
+  document.querySelectorAll('.tuner-note.matched').forEach(b => b.classList.remove('matched'));
+  if(absCents <= 15){
+    // Cherche la corde la plus proche
+    document.querySelectorAll('.tuner-note').forEach(btn => {
+      const refFreq = parseFloat(btn.dataset.freq);
+      // À moins de 0.5 semitone (50 cents) de cette note
+      const refMidi = 12 * Math.log2(refFreq / 440) + 69;
+      const detectedMidi = 12 * Math.log2(freq / 440) + 69;
+      if(Math.abs(refMidi - detectedMidi) < 0.5){
+        btn.classList.add('matched');
+      }
+    });
+  }
+}
+
+// ── PROMPTEUR (paroles défilantes) ───────────────────────────
+let _prompterAnimId = null;
+let _prompterPlaying = false;
+let _prompterSections = []; // [{id, label, text, isChord}]
+let _prompterCurSection = null;
+
+// Sections disponibles + leur source HTML
+const PROMPTER_SECTIONS = [
+  {id:'lyrics', label:'📖 Paroles', sourceId:'pa-lyrics', isChord:false},
+  {id:'guitar', label:'🎸 Guitare', sourceId:'pa-guitar', isChord:true},
+  {id:'bass',   label:'🎸 Basse',   sourceId:'pa-bass',   isChord:true},
+  {id:'keys',   label:'🎹 Clavier', sourceId:'pa-keys',   isChord:true},
+  {id:'drums',  label:'🥁 Batterie',sourceId:'pa-drums',  isChord:true},
+  {id:'notes',  label:'📝 Notes',   sourceId:'pa-notes',  isChord:true},
+];
+
+window.openPrompter = function(){
+  // Récupérer toutes les sections qui ont du contenu
+  _prompterSections = PROMPTER_SECTIONS
+    .map(s => {
+      const el = document.getElementById(s.sourceId);
+      const text = el ? el.value.trim() : '';
+      return text ? {...s, text} : null;
+    })
+    .filter(Boolean);
+
+  if(!_prompterSections.length){
+    alert('Pas de contenu à afficher 🙂\nRemplis d\'abord au moins une section (paroles, guitare, basse...).');
+    return;
+  }
+
+  // Titre
+  const titleEl = document.getElementById('pt-title');
+  document.getElementById('prompter-title').textContent = titleEl ? titleEl.textContent : '';
+
+  // Construire les tabs
+  const tabsEl = document.getElementById('prompter-tabs');
+  tabsEl.innerHTML = '';
+  _prompterSections.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'prompter-tab';
+    btn.textContent = s.label;
+    btn.dataset.section = s.id;
+    btn.addEventListener('click', () => switchPrompterSection(s.id));
+    tabsEl.appendChild(btn);
+  });
+
+  // Afficher la première section (paroles en priorité si dispo)
+  switchPrompterSection(_prompterSections[0].id);
+
+  // Init font size
+  applyPrompterFontSize(parseInt(document.getElementById('prompter-fontsize').value, 10));
+
+  // État par défaut : pause
+  _prompterPlaying = false;
+  document.getElementById('prompter-play').textContent = '▶';
+  document.getElementById('prompter-play').classList.remove('playing');
+  document.getElementById('prompter-ov').style.display = 'flex';
+};
+
+function switchPrompterSection(sectionId){
+  // Pause en cas de switch en cours
+  if(_prompterPlaying) stopPrompterScroll();
+  const sec = _prompterSections.find(s => s.id === sectionId);
+  if(!sec) return;
+  _prompterCurSection = sectionId;
+  // Mettre à jour le texte
+  const textEl = document.getElementById('prompter-text');
+  textEl.textContent = sec.text;
+  // Mode "accords" = police monospace + alignement à gauche
+  if(sec.isChord){
+    textEl.classList.add('chord');
+  } else {
+    textEl.classList.remove('chord');
+  }
+  // Mettre à jour la barre d'onglets
+  document.querySelectorAll('.prompter-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.section === sectionId);
+  });
+  // Reset position au début
+  document.getElementById('prompter-content').scrollTop = 0;
+}
+
+window.closePrompter = function(){
+  stopPrompterScroll();
+  document.getElementById('prompter-ov').style.display = 'none';
+};
+
+function applyPrompterFontSize(px){
+  document.getElementById('prompter-text').style.fontSize = px + 'px';
+  document.getElementById('prompter-fontsize-val').textContent = px + 'px';
+}
+
+window.togglePrompter = function(){
+  if(_prompterPlaying){ stopPrompterScroll(); }
+  else { startPrompterScroll(); }
+};
+
+function startPrompterScroll(){
+  _prompterPlaying = true;
+  const btn = document.getElementById('prompter-play');
+  btn.textContent = '⏸';
+  btn.classList.add('playing');
+  const content = document.getElementById('prompter-content');
+  let lastTs = performance.now();
+  function step(ts){
+    if(!_prompterPlaying) return;
+    const delta = ts - lastTs;
+    lastTs = ts;
+    const speedSlider = parseInt(document.getElementById('prompter-speed').value, 10);
+    const pxPerSec = 5 + (speedSlider * 195 / 100);
+    const dy = (pxPerSec * delta) / 1000;
+    content.scrollTop += dy;
+    if(content.scrollTop + content.clientHeight >= content.scrollHeight - 5){
+      stopPrompterScroll();
+      return;
+    }
+    _prompterAnimId = requestAnimationFrame(step);
+  }
+  _prompterAnimId = requestAnimationFrame(step);
+}
+
+function stopPrompterScroll(){
+  _prompterPlaying = false;
+  if(_prompterAnimId){
+    cancelAnimationFrame(_prompterAnimId);
+    _prompterAnimId = null;
+  }
+  const btn = document.getElementById('prompter-play');
+  if(btn){
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+  }
+}
+
+// Slider de taille de police → mise à jour en direct
+document.getElementById('prompter-fontsize').addEventListener('input', e => {
+  applyPrompterFontSize(parseInt(e.target.value, 10));
+});
+
+// Tap sur le contenu = pause/play
+document.getElementById('prompter-content').addEventListener('click', (e) => {
+  if(e.target.closest('.prompter-controls') || e.target.closest('.prompter-tabs')) return;
+  togglePrompter();
+});
+
+// Échappe pour fermer le prompteur + flèches pour changer de section
+document.addEventListener('keydown', e => {
+  if(document.getElementById('prompter-ov').style.display !== 'flex') return;
+  if(e.key === 'Escape'){ closePrompter(); return; }
+  if(e.key === ' '){ e.preventDefault(); togglePrompter(); return; }
+  // Flèches gauche/droite pour switcher de section
+  if((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && _prompterSections.length > 1){
+    e.preventDefault();
+    const curIdx = _prompterSections.findIndex(s => s.id === _prompterCurSection);
+    const dir = e.key === 'ArrowRight' ? 1 : -1;
+    const nextIdx = (curIdx + dir + _prompterSections.length) % _prompterSections.length;
+    switchPrompterSection(_prompterSections[nextIdx].id);
+  }
+});
+
+// ── AUTO-FIND TRACK DURATION (via iTunes Search API) ─────────
+// Gratuit, pas d'auth, supporte CORS, retourne trackTimeMillis
+window.autoFindDuration = async function(titleId, artistId, durId){
+  const titleEl  = document.getElementById(titleId);
+  const artistEl = document.getElementById(artistId);
+  const durEl    = document.getElementById(durId);
+  if(!titleEl || !artistEl || !durEl) return;
+  const title  = titleEl.value.trim();
+  const artist = artistEl.value.trim();
+  if(!title || !artist){
+    alert('Remplis d\'abord le titre et l\'artiste 🙂');
+    return;
+  }
+  // Bouton "🔍" → "⏳" pendant la recherche
+  const btn = document.getElementById(durId + '-find');
+  const originalText = btn ? btn.textContent : '';
+  if(btn){ btn.textContent = '⏳'; btn.disabled = true; }
+  try{
+    const query = encodeURIComponent(title + ' ' + artist);
+    const url = 'https://itunes.apple.com/search?term=' + query + '&entity=song&limit=5';
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if(!data.results || !data.results.length){
+      alert('Pas trouvé sur iTunes 😕\nMets la durée à la main.');
+      return;
+    }
+    // Prendre le meilleur match (artiste qui correspond le mieux)
+    const lcArtist = artist.toLowerCase();
+    let best = data.results[0];
+    for(const r of data.results){
+      if(r.artistName && r.artistName.toLowerCase().includes(lcArtist)){
+        best = r;
+        break;
+      }
+    }
+    if(!best.trackTimeMillis){
+      alert('Pas de durée trouvée 😕');
+      return;
+    }
+    const totalSec = Math.floor(best.trackTimeMillis / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    durEl.value = m + ':' + String(s).padStart(2, '0');
+    // Petit feedback visuel : flash vert
+    durEl.style.background = '#E1F5EE';
+    setTimeout(()=>{ durEl.style.background = ''; }, 800);
+  }catch(e){
+    console.error('iTunes lookup failed:', e);
+    alert('Erreur de recherche 😕\nVérifie ta connexion ou mets la durée à la main.');
+  }finally{
+    if(btn){ btn.textContent = originalText; btn.disabled = false; }
+  }
+};
+
+// ── THÈME / APPARENCE ────────────────────────────────────────
+// Calculer un bg clair et un text-color foncé à partir d'une couleur principale
+function hexToRgb(hex){
+  const m = /^#?([0-9A-F]{6})$/i.exec(hex);
+  if(!m) return [0,0,0];
+  const n = parseInt(m[1], 16);
+  return [(n>>16)&0xFF, (n>>8)&0xFF, n&0xFF];
+}
+function rgbToHex(r,g,b){
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+function lighten(hex, pct){
+  const [r,g,b] = hexToRgb(hex);
+  return rgbToHex(
+    Math.round(r + (255-r)*pct),
+    Math.round(g + (255-g)*pct),
+    Math.round(b + (255-b)*pct)
+  );
+}
+function darken(hex, pct){
+  const [r,g,b] = hexToRgb(hex);
+  return rgbToHex(
+    Math.round(r*(1-pct)),
+    Math.round(g*(1-pct)),
+    Math.round(b*(1-pct))
+  );
+}
+
+// Thème par défaut
+const DEFAULT_THEME = {
+  bg:       '#FAF7F2',
+  accent:   '#1A1714',
+  lounge:   '#8B6F47',
+  loungeBg: '#F4ECDB',
+  club:     '#C2185B',
+  clubBg:   '#FBDDE9',
+};
+
+// Appliquer un thème à la page
+function applyTheme(theme){
+  const t = {...DEFAULT_THEME, ...(theme||{})};
+  // Fond du site
+  document.documentElement.style.setProperty('--cream', t.bg);
+  // Accent (titres, boutons)
+  document.documentElement.style.setProperty('--ink', t.accent);
+  // STYLES LOUNGE et CLUB : couleur principale + bg (tranche) explicite + tc auto-calculé depuis le bg
+  STYLES.lounge = {
+    label: 'LOUNGE',
+    color: t.lounge,
+    bg:    t.loungeBg || lighten(t.lounge, .82),
+    tc:    darken(t.loungeBg || t.lounge, .55),
+  };
+  STYLES.club = {
+    label: 'CLUB',
+    color: t.club,
+    bg:    t.clubBg || lighten(t.club, .82),
+    tc:    darken(t.clubBg || t.club, .55),
+  };
+  // Re-render
+  try{ rebuild(); }catch(e){}
+}
+
+window.openThemeModal = function(){
+  if(!isAdmin()){ alert('Seuls les admins peuvent personnaliser l\'apparence.'); return; }
+  const t = {...DEFAULT_THEME, ...(window._currentTheme || {})};
+  document.getElementById('theme-bg').value       = t.bg;
+  document.getElementById('theme-accent').value   = t.accent;
+  document.getElementById('theme-lounge').value   = t.lounge;
+  document.getElementById('theme-loungeBg').value = t.loungeBg;
+  document.getElementById('theme-club').value     = t.club;
+  document.getElementById('theme-clubBg').value   = t.clubBg;
+  document.getElementById('theme-ov').style.display = 'flex';
+};
+window.closeThemeModal = function(){ document.getElementById('theme-ov').style.display = 'none'; };
+
+window.saveTheme = async function(){
+  if(!isAdmin()) return;
+  const theme = {
+    bg:       document.getElementById('theme-bg').value,
+    accent:   document.getElementById('theme-accent').value,
+    lounge:   document.getElementById('theme-lounge').value,
+    loungeBg: document.getElementById('theme-loungeBg').value,
+    club:     document.getElementById('theme-club').value,
+    clubBg:   document.getElementById('theme-clubBg').value,
+  };
+  await set(ref(db,'settings/theme'), theme);
+  window._currentTheme = theme;
+  applyTheme(theme);
+  closeThemeModal();
+};
+
+window.resetTheme = async function(){
+  if(!isAdmin()) return;
+  if(!confirm('Remettre les couleurs par défaut ?')) return;
+  await set(ref(db,'settings/theme'), null);
+  window._currentTheme = {...DEFAULT_THEME};
+  applyTheme(DEFAULT_THEME);
+  // Refresh inputs
+  document.getElementById('theme-bg').value       = DEFAULT_THEME.bg;
+  document.getElementById('theme-accent').value   = DEFAULT_THEME.accent;
+  document.getElementById('theme-lounge').value   = DEFAULT_THEME.lounge;
+  document.getElementById('theme-loungeBg').value = DEFAULT_THEME.loungeBg;
+  document.getElementById('theme-club').value     = DEFAULT_THEME.club;
+  document.getElementById('theme-clubBg').value   = DEFAULT_THEME.clubBg;
+};
+
+// Fermeture si click outside
+document.getElementById('theme-ov').addEventListener('click', e => {
+  if(e.target === document.getElementById('theme-ov')) closeThemeModal();
+});
 
 document.getElementById('mo-confirm').addEventListener('click', () => {
   const name = document.getElementById('id-name').value.trim();
@@ -1536,6 +2643,10 @@ function buildSetlists(){
       const author = getTrackAuthor(tr);
       const el = document.createElement('div');
       el.className = 'track'+(tr.s==='medley'?' is-med':'')+(excl?' is-excl':'')+(tr.custom?' is-new':'');
+      // Bande verticale gauche = couleur de la formule du morceau
+      if(tr.custom && sty.color){
+        el.style.borderLeft = '3px solid ' + sty.color;
+      }
       const medleyTag = tr.s==='medley' ? '<span class="mtag">Medley</span>' : '';
       const authorTag = author
         ? '<span class="ntag" style="background:'+author.color+'25;color:'+author.color+'" title="Ajouté par '+esc(author.name)+'">'+esc(author.initials)+'</span>'
@@ -1618,13 +2729,16 @@ function buildConcerts(){
     const trackIds = (c.trackIds||[]).filter(Boolean);
     const tracks = trackIds.map(id => allTracks().find(t => t.id === id)).filter(Boolean);
     const total = tracks.reduce((a,tr)=>a+pd(tr.d),0);
+    const ccolor = getConcertColor(c.color);
     const card = document.createElement('div');
-    card.className = 'ccard';
+    card.className = 'ccard' + (ccolor ? ' has-color' : '');
+    if(ccolor) card.style.setProperty('--ccolor', ccolor);
     const dateTxt = c.date ? fmtConcertDate(c.date) : 'Date non définie';
+    const nameColored = ccolor ? ' style="color:'+ccolor+'"' : '';
     card.innerHTML =
       '<div class="ccard-top">'
         +'<div style="min-width:0">'
-          +'<div class="ccard-name">'+esc(c.name)+'</div>'
+          +'<div class="ccard-name"'+nameColored+'>'+esc(c.name)+'</div>'
           +'<div class="ccard-meta">'+esc(dateTxt)+(c.venue?' · '+esc(c.venue):'')+'</div>'
         +'</div>'
         +'<div class="ccard-top-actions">'
@@ -1651,6 +2765,101 @@ function buildConcerts(){
 }
 
 // ── CONCERT MODAL (create/edit) ──────────────────────────────
+// ── CONCERT COLOR PALETTE ────────────────────────────────────
+// Pastilles "rapides" + roue de couleurs libre
+const CONCERT_COLORS = [
+  '#E59CAB', // rose poudré
+  '#8E3850', // bordeaux
+  '#E0985E', // mandarine
+  '#D4A540', // doré
+  '#7A9572', // sauge
+  '#5BA9A0', // turquoise
+  '#5B7591', // bleu nuit
+  '#8B6F8E', // lavande
+];
+function getConcertColor(c){
+  if(!c) return null;
+  // Compat ancienne nomenclature (id 'rose' → hex)
+  const legacy = {rose:'#E59CAB',bordeaux:'#8E3850',orange:'#E0985E',jaune:'#D4A540',vert:'#7A9572',turquoise:'#5BA9A0',bleu:'#5B7591',violet:'#8B6F8E'};
+  if(legacy[c]) return legacy[c];
+  // HEX direct
+  if(/^#[0-9A-Fa-f]{6}$/.test(c)) return c;
+  return null;
+}
+function renderConcertColorPicker(selectedHex){
+  const wrap = document.getElementById('c-color-picker');
+  wrap.innerHTML = '';
+  const selectedNorm = getConcertColor(selectedHex);
+
+  // Option "Aucune"
+  const none = document.createElement('button');
+  none.type = 'button';
+  none.className = 'color-swatch none' + (!selectedNorm ? ' selected' : '');
+  none.title = 'Aucune couleur';
+  none.dataset.color = '';
+  none.innerHTML = '×';
+  none.addEventListener('click', () => setColorSelection(''));
+  wrap.appendChild(none);
+
+  // Pastilles rapides
+  CONCERT_COLORS.forEach(hex => {
+    const sw = document.createElement('button');
+    sw.type = 'button';
+    sw.className = 'color-swatch' + ((selectedNorm && selectedNorm.toLowerCase() === hex.toLowerCase()) ? ' selected' : '');
+    sw.style.background = hex;
+    sw.dataset.color = hex;
+    sw.addEventListener('click', () => setColorSelection(hex));
+    wrap.appendChild(sw);
+  });
+
+  // Color picker libre (input type=color natif = roue de couleur du système)
+  const customWrap = document.createElement('label');
+  customWrap.className = 'color-swatch custom';
+  customWrap.title = 'Couleur personnalisée (roue de couleur)';
+  // Si la couleur courante n'est pas dans les pastilles, la considérer comme custom
+  const isInPalette = selectedNorm && CONCERT_COLORS.some(c => c.toLowerCase() === selectedNorm.toLowerCase());
+  if(selectedNorm && !isInPalette){
+    customWrap.classList.add('selected');
+    customWrap.style.background = selectedNorm;
+  }
+  customWrap.innerHTML = '<span>🎨</span><input type="color" id="c-color-custom" value="' + (selectedNorm && !isInPalette ? selectedNorm : '#C2A14B') + '">';
+  wrap.appendChild(customWrap);
+
+  const customInput = document.getElementById('c-color-custom');
+  customInput.addEventListener('input', () => {
+    setColorSelection(customInput.value, true);
+  });
+}
+// Sélection courante (état interne du picker)
+let _pickerSelection = '';
+function setColorSelection(hex, fromCustom = false){
+  _pickerSelection = hex;
+  const wrap = document.getElementById('c-color-picker');
+  if(!wrap) return;
+  wrap.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  if(!hex){
+    wrap.querySelector('.color-swatch.none')?.classList.add('selected');
+    wrap.querySelector('.color-swatch.custom')?.removeAttribute('style');
+    return;
+  }
+  // Pastille préréglée ?
+  const sw = wrap.querySelector('.color-swatch[data-color="' + hex + '"]');
+  if(sw && !fromCustom){
+    sw.classList.add('selected');
+    wrap.querySelector('.color-swatch.custom')?.removeAttribute('style');
+  } else {
+    // Custom
+    const custom = wrap.querySelector('.color-swatch.custom');
+    if(custom){
+      custom.classList.add('selected');
+      custom.style.background = hex;
+    }
+  }
+}
+function getSelectedConcertColor(){
+  return _pickerSelection || null;
+}
+
 function openConcertModal(concertId){
   if(!isAdmin()){ alert('Seuls les admins peuvent créer ou modifier des concerts.'); return; }
   curConcertEditId = concertId || null;
@@ -1660,6 +2869,8 @@ function openConcertModal(concertId){
   document.getElementById('c-date').value  = c?(c.date||''):'';
   document.getElementById('c-venue').value = c?(c.venue||''):'';
   document.getElementById('c-err').style.display = 'none';
+  _pickerSelection = c ? (getConcertColor(c.color) || '') : '';
+  renderConcertColorPicker(_pickerSelection);
   document.getElementById('concert-ov').style.display = 'flex';
   setTimeout(() => document.getElementById('c-name').focus(), 100);
 }
@@ -1679,18 +2890,19 @@ window.saveConcert = async function(){
   document.getElementById('c-err').style.display='none';
   const date  = document.getElementById('c-date').value.trim()||null;
   const venue = document.getElementById('c-venue').value.trim()||null;
+  const color = getSelectedConcertColor();
 
   if(curConcertEditId && fbConcerts[curConcertEditId]){
     const existing = fbConcerts[curConcertEditId];
     await set(ref(db,'concerts/'+curConcertEditId), {
       ...existing,
-      name, date, venue,
+      name, date, venue, color,
       updatedBy: me.name, updatedAt: Date.now()
     });
   } else {
     const id = 'concert_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
     await set(ref(db,'concerts/'+id), {
-      id, name, date, venue,
+      id, name, date, venue, color,
       trackIds: [],
       createdBy: me.name, createdAt: Date.now(),
       updatedBy: me.name, updatedAt: Date.now()
@@ -1729,6 +2941,15 @@ function renderConcertDetail(){
   if(!c){ closeCdetail(); return; }
   const adminUser = isAdmin();
   document.getElementById('cd-name').textContent = c.name;
+  const ccolor = getConcertColor(c.color);
+  const header = document.getElementById('cd-header');
+  if(ccolor){
+    header.style.borderBottomColor = ccolor;
+    document.getElementById('cd-name').style.color = ccolor;
+  } else {
+    header.style.borderBottomColor = 'transparent';
+    document.getElementById('cd-name').style.color = '';
+  }
   const metaParts = [];
   if(c.date) metaParts.push(fmtConcertDate(c.date));
   if(c.venue) metaParts.push(c.venue);
@@ -1749,14 +2970,19 @@ function renderConcertDetail(){
   const list = document.createElement('div');
   list.className = 'cd-list';
   list.id = 'cd-sortable-list';
+  // Accent couleur sur le bord gauche de la liste
+  if(ccolor){
+    list.style.borderLeft = '4px solid ' + ccolor;
+  }
   tracks.forEach((tr,i) => {
     const el = document.createElement('div');
     el.className = 'cd-item';
     el.dataset.idx = i;
     const dragHandle = adminUser ? '<span class="cd-drag" title="Glisser pour réordonner">⋮⋮</span>' : '<span></span>';
+    const numStyle = ccolor ? ' style="color:'+ccolor+';font-weight:700"' : '';
     const numCell = adminUser
-      ? '<input type="number" class="cd-num-input" value="'+(i+1)+'" min="1" max="'+trackIds.length+'" data-idx="'+i+'" title="Tape un numéro pour déplacer">'
-      : '<span style="font-family:\'DM Serif Display\',serif;font-size:1.1rem;text-align:center">'+(i+1)+'</span>';
+      ? '<input type="number" class="cd-num-input" value="'+(i+1)+'" min="1" max="'+trackIds.length+'" data-idx="'+i+'" title="Tape un numéro pour déplacer"'+(ccolor?' style="color:'+ccolor+';border-color:'+ccolor+'33;font-weight:700"':'')+'>'
+      : '<span style="font-family:\'DM Serif Display\',serif;font-size:1.1rem;text-align:center'+(ccolor?';color:'+ccolor:'')+'">'+(i+1)+'</span>';
     const rmBtn = adminUser ? '<button class="cd-rm" data-rm="'+i+'" title="Retirer">✕</button>' : '<span></span>';
     if(!tr){
       el.innerHTML = dragHandle + numCell + '<div class="cd-info"><div class="cd-tt" style="color:var(--faint);font-style:italic">Titre supprimé</div></div><span></span><span></span>' + rmBtn;
@@ -1785,7 +3011,13 @@ function renderConcertDetail(){
   const langStr = (nFr || nEn) ? ' · 🇫🇷 '+nFr+' / 🇬🇧 '+nEn : '';
   const footer = document.createElement('div');
   footer.className = 'cd-total';
-  footer.innerHTML = '<span>'+trackIds.length+' titre'+(trackIds.length>1?'s':'')+langStr+'</span><span>Durée totale : <strong>'+fl(total)+'</strong></span>';
+  // Footer en couleur d'accent si définie
+  if(ccolor){
+    footer.style.borderLeft = '4px solid ' + ccolor;
+    footer.style.background = ccolor + '15'; // 15 = ~8% opacité en hex
+    footer.style.borderColor = ccolor + '40';
+  }
+  footer.innerHTML = '<span>'+trackIds.length+' titre'+(trackIds.length>1?'s':'')+langStr+'</span><span>Durée totale : <strong'+(ccolor?' style="color:'+ccolor+'"':'')+'>'+fl(total)+'</strong></span>';
   wrap.appendChild(footer);
 
   if(adminUser){
@@ -1959,8 +3191,19 @@ function renderPickerList(){
 }
 
 function updatePickerCount(){
+  const total = pickerSelection.size;
+  const all = allTracks();
+  let nFr = 0, nEn = 0;
+  pickerSelection.forEach(id => {
+    const tr = all.find(t => t.id === id);
+    if(tr){
+      if(tr.lang === 'fr') nFr++;
+      else if(tr.lang === 'en') nEn++;
+    }
+  });
+  const langStr = (nFr || nEn) ? '  ·  🇫🇷 '+nFr+' / 🇬🇧 '+nEn : '';
   document.getElementById('picker-count').textContent =
-    pickerSelection.size+' titre'+(pickerSelection.size>1?'s':'')+' sélectionné'+(pickerSelection.size>1?'s':'');
+    total+' titre'+(total>1?'s':'')+' sélectionné'+(total>1?'s':'')+langStr;
 }
 
 window.addPickedTracks = async function(){
@@ -1990,8 +3233,20 @@ window.exportConcertPDF = function(){
   const pageW = 210, pageH = 297, margin = 18, maxW = pageW - 2*margin;
   let y = 25;
 
-  // Top band
-  doc.setFillColor(26,23,20);
+  // Color accent depuis le concert
+  const colorHex = getConcertColor(c.color);
+  // Convert hex (#RRGGBB) -> RGB pour jsPDF
+  let accent = [26,23,20]; // défaut : presque noir
+  if(colorHex && /^#[0-9A-F]{6}$/i.test(colorHex)){
+    accent = [
+      parseInt(colorHex.slice(1,3), 16),
+      parseInt(colorHex.slice(3,5), 16),
+      parseInt(colorHex.slice(5,7), 16),
+    ];
+  }
+
+  // Top band avec couleur d'accent
+  doc.setFillColor(accent[0], accent[1], accent[2]);
   doc.rect(0, 0, pageW, 3, 'F');
 
   // Eyebrow
@@ -2000,10 +3255,10 @@ window.exportConcertPDF = function(){
   doc.setTextColor(160,155,150);
   doc.text('SETLIST DE CONCERT · CRUSH MUSIC', margin, y);
   y += 7;
-  // Name
+  // Name (en couleur accent si définie)
   doc.setFont('helvetica','bold');
   doc.setFontSize(26);
-  doc.setTextColor(26,23,20);
+  doc.setTextColor(accent[0], accent[1], accent[2]);
   const nameLines = doc.splitTextToSize(c.name, maxW);
   nameLines.forEach(ln => { doc.text(ln, margin, y); y += 10; });
   // Date & venue
@@ -2022,8 +3277,8 @@ window.exportConcertPDF = function(){
   doc.setTextColor(107,101,96);
   doc.text(tracks.length+' titre'+(tracks.length>1?'s':'')+'  ·  Durée estimée : '+fl(total)+langPart, margin, y);
   y += 4;
-  // Divider
-  doc.setDrawColor(26,23,20);
+  // Divider (en couleur accent)
+  doc.setDrawColor(accent[0], accent[1], accent[2]);
   doc.setLineWidth(0.6);
   doc.line(margin, y, pageW-margin, y);
   y += 10;
@@ -2127,6 +3382,13 @@ onValue(ref(db,'partitions'), snap=>{
 onValue(ref(db,'hearts'),     snap=>{ fbHearts  = snap.val()||{}; rebuild(); });
 onValue(ref(db,'overrides'),  snap=>{ fbOverrides = snap.val()||{}; rebuild(); });
 onValue(ref(db,'concerts'),   snap=>{ fbConcerts = snap.val()||{}; rebuild(); });
+
+// Listener pour le thème personnalisé
+onValue(ref(db,'settings/theme'), snap => {
+  const theme = snap.val();
+  window._currentTheme = theme || {...DEFAULT_THEME};
+  applyTheme(window._currentTheme);
+});
 onValue(ref(db,'styles'),     snap=>{
   fbStyles = snap.val()||{};
   // Ensure each has bg/tc (auto-derive if missing)
@@ -2138,7 +3400,12 @@ onValue(ref(db,'styles'),     snap=>{
     }
   });
   STYLES = {...BUILTIN_STYLES, ...fbStyles};
-  rebuild();
+  // Ré-appliquer le thème personnalisé pour LOUNGE et CLUB
+  if(window._currentTheme){
+    applyTheme(window._currentTheme);
+  } else {
+    rebuild();
+  }
 });
 
 // ── ESC ───────────────────────────────────────────────────────
@@ -2165,10 +3432,29 @@ if(me){
   document.getElementById('idbar').style.display = 'flex';
   document.getElementById('idbadge').innerHTML =
     '<div class="av" style="background:'+me.color+'">'+me.initials+'</div>'+esc(me.name);
+  const colorInput = document.getElementById('my-color-input');
+  if(colorInput) colorInput.value = me.color;
+  // Bouton "Apparence" pour admins
+  const themeBtn = document.getElementById('theme-btn');
+  if(themeBtn) themeBtn.style.display = isAdmin() ? '' : 'none';
   rebuild();
 } else {
   openMo();
 }
+// Quand fbMembers se charge depuis Firebase, on récupère la couleur perso de me
+onValue(ref(db,'members'), snap => {
+  if(me){
+    const fb = (snap.val()||{})[fbk(me.name)];
+    if(fb && fb.color && fb.color !== me.color){
+      me.color = fb.color;
+      saveMe(me);
+      document.getElementById('idbadge').innerHTML =
+        '<div class="av" style="background:'+me.color+'">'+me.initials+'</div>'+esc(me.name);
+      const colorInput = document.getElementById('my-color-input');
+      if(colorInput) colorInput.value = me.color;
+    }
+  }
+});
 setTimeout(()=>{ document.getElementById('loading').style.display='none'; }, 1000);
 </script>
 </body>
