@@ -1413,11 +1413,16 @@ function buildStats(){
   }
   if(curTab==='concerts'){
     const concerts = Object.values(fbConcerts);
-    const totalTracks = concerts.reduce((a,c)=>a+((c.trackIds||[]).filter(Boolean).length),0);
+    const allTr = allTracks();
+    const trById = {}; allTr.forEach(t=>{trById[t.id]=t});
+    const programmedTracks = concerts.flatMap(c=>(c.trackIds||[]).filter(Boolean).map(id=>trById[id])).filter(Boolean);
+    const totalTracks = programmedTracks.length;
+    const nFr = programmedTracks.filter(t=>t.lang==='fr').length;
+    const nEn = programmedTracks.filter(t=>t.lang==='en').length;
     el.innerHTML = [
       {n:concerts.length,l:'concerts'},
       {n:totalTracks,l:'titres programmés'},
-      {n:'—',l:''},
+      {n:'🇫🇷 '+nFr+' · 🇬🇧 '+nEn,l:'par langue'},
     ].map(s=>'<div class="stat"><div class="stat-n">'+s.n+'</div><div class="stat-l">'+s.l+'</div></div>').join('');
     return;
   }
@@ -1427,9 +1432,11 @@ function buildStats(){
     (!showExcl||isExcl(tr))
   );
   const total = f.filter(tr=>!isExcl(tr)).reduce((a,tr)=>a+pd(tr.d),0);
+  const nFr = f.filter(tr=>tr.lang==='fr').length;
+  const nEn = f.filter(tr=>tr.lang==='en').length;
   el.innerHTML = [
     {n:f.length,l:'morceaux'},
-    {n:[...new Set(f.map(tr=>tr.s))].length,l:'genres'},
+    {n:'🇫🇷 '+nFr+' · 🇬🇧 '+nEn,l:'par langue'},
     {n:fl(total),l:'durée totale'},
   ].map(s=>'<div class="stat"><div class="stat-n">'+s.n+'</div><div class="stat-l">'+s.l+'</div></div>').join('');
 }
@@ -1755,11 +1762,12 @@ function renderConcertDetail(){
       el.innerHTML = dragHandle + numCell + '<div class="cd-info"><div class="cd-tt" style="color:var(--faint);font-style:italic">Titre supprimé</div></div><span></span><span></span>' + rmBtn;
     } else {
       const sty = STYLES[tr.s]||STYLES.pop;
+      const flag = tr.lang==='fr' ? '🇫🇷 ' : tr.lang==='en' ? '🇬🇧 ' : '';
       el.innerHTML =
         dragHandle
         + numCell
         +'<div class="cd-info">'
-          +'<div class="cd-tt">'+esc(tr.t)+'</div>'
+          +'<div class="cd-tt">'+flag+esc(tr.t)+'</div>'
           +'<div class="cd-ta">'+esc(tr.a)+'</div>'
         +'</div>'
         +'<span class="cd-dur">'+esc(tr.d||'?')+'</span>'
@@ -1771,9 +1779,13 @@ function renderConcertDetail(){
   wrap.innerHTML = '';
   wrap.appendChild(list);
   const total = tracks.filter(Boolean).reduce((a,tr)=>a+pd(tr.d),0);
+  const validTracks = tracks.filter(Boolean);
+  const nFr = validTracks.filter(tr=>tr.lang==='fr').length;
+  const nEn = validTracks.filter(tr=>tr.lang==='en').length;
+  const langStr = (nFr || nEn) ? ' · 🇫🇷 '+nFr+' / 🇬🇧 '+nEn : '';
   const footer = document.createElement('div');
   footer.className = 'cd-total';
-  footer.innerHTML = '<span>'+trackIds.length+' titre'+(trackIds.length>1?'s':'')+'</span><span>Durée totale : <strong>'+fl(total)+'</strong></span>';
+  footer.innerHTML = '<span>'+trackIds.length+' titre'+(trackIds.length>1?'s':'')+langStr+'</span><span>Durée totale : <strong>'+fl(total)+'</strong></span>';
   wrap.appendChild(footer);
 
   if(adminUser){
@@ -1923,12 +1935,13 @@ function renderPickerList(){
       const already = existing.has(tr.id);
       const selected = pickerSelection.has(tr.id);
       const sty = STYLES[tr.s]||STYLES.pop;
+      const flag = tr.lang==='fr' ? '🇫🇷 ' : tr.lang==='en' ? '🇬🇧 ' : '';
       const row = document.createElement('label');
       row.className = 'picker-item'+(selected?' sel':'')+(already?' already':'');
       row.innerHTML =
         '<input type="checkbox" '+(selected?'checked':'')+(already?' disabled':'')+'>'
         +'<div class="picker-item-info">'
-          +'<div class="picker-item-t">'+esc(tr.t)+(already?' <span style="color:var(--faint);font-size:11px">(déjà dans la setlist)</span>':'')+'</div>'
+          +'<div class="picker-item-t">'+flag+esc(tr.t)+(already?' <span style="color:var(--faint);font-size:11px">(déjà dans la setlist)</span>':'')+'</div>'
           +'<div class="picker-item-a">'+esc(tr.a)+'</div>'
         +'</div>'
         +'<span class="pill" style="background:'+sty.bg+';color:'+sty.tc+'">'+sty.label+'</span>'
@@ -2002,9 +2015,12 @@ window.exportConcertPDF = function(){
   if(sub){ doc.text(sub, margin, y); y += 7; }
   // Stats
   const total = tracks.reduce((a,tr)=>a+pd(tr.d),0);
+  const nFr = tracks.filter(tr => tr.lang === 'fr').length;
+  const nEn = tracks.filter(tr => tr.lang === 'en').length;
+  const langPart = (nFr || nEn) ? '  ·  '+(nFr?nFr+' FR':'')+(nFr && nEn?' / ':'')+(nEn?nEn+' EN':'') : '';
   doc.setFontSize(10);
   doc.setTextColor(107,101,96);
-  doc.text(tracks.length+' titre'+(tracks.length>1?'s':'')+'  ·  Durée estimée : '+fl(total), margin, y);
+  doc.text(tracks.length+' titre'+(tracks.length>1?'s':'')+'  ·  Durée estimée : '+fl(total)+langPart, margin, y);
   y += 4;
   // Divider
   doc.setDrawColor(26,23,20);
@@ -2040,9 +2056,10 @@ window.exportConcertPDF = function(){
     const artistLines = doc.splitTextToSize(tr.a, maxW - 14);
     doc.text(artistLines[0], margin+14, y);
     const styleLabel = STYLES[tr.s]?STYLES[tr.s].label:tr.s;
+    const langPrefix = tr.lang==='fr' ? 'FR · ' : tr.lang==='en' ? 'EN · ' : '';
     doc.setFontSize(8);
     doc.setTextColor(160,155,150);
-    doc.text(styleLabel, pageW-margin, y, {align:'right'});
+    doc.text(langPrefix + styleLabel, pageW-margin, y, {align:'right'});
     y += 3;
     // Thin divider
     doc.setDrawColor(232,226,218);
