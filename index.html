@@ -203,7 +203,15 @@ main{max-width:960px;margin:0 auto;padding:2rem}
 .track.is-med .trow:hover{background:#F0EDE7}
 .track.is-new{border-left:3px solid var(--green)}
 .tnum{font-size:11px;color:var(--faint);text-align:right}
-.tinfo{min-width:0}
+.tinfo{min-width:0;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,.06)}
+.tinfo:active{opacity:.6}
+/* Fiche détail d'un morceau */
+.td-row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--border);font-size:14px}
+.td-row:last-child{border-bottom:0}
+.td-k{color:var(--muted);font-weight:500;flex-shrink:0}
+.td-v{text-align:right;font-weight:500;word-break:break-word}
+.td-form{display:inline-block;font-size:11px;font-weight:700;padding:3px 12px;border-radius:99px}
+.td-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:1.2rem}
 .tt{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ta2{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tnote{font-size:11px;color:var(--faint);font-style:italic;margin-top:1px}
@@ -1990,6 +1998,61 @@ window.openEdit = function(id){
 
 window.closeEdit = function(){ document.getElementById('edit-ov').style.display='none'; curEditId=null; };
 
+// ── FICHE DÉTAIL D'UN MORCEAU (appui sur le titre) ───────────
+const LANG_LABELS = { fr:'Français', en:'Anglais', es:'Espagnol', it:'Italien', pt:'Portugais', de:'Allemand' };
+window.openTrackDetail = function(id){
+  const tr = allTracks().find(t => t.id === id);
+  if(!tr) return;
+  let ov = document.getElementById('tdetail-ov');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.className = 'ov'; ov.id = 'tdetail-ov'; ov.style.display = 'none';
+    ov.innerHTML = '<div class="box"><div id="td-content"></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e => { if(e.target === ov) closeTrackDetail(); });
+  }
+  const sty = STYLES[tr.s] || STYLES.pop || {label:tr.s, color:'#888', tc:'#fff', bg:'#eee'};
+  const author = (typeof getTrackAuthor === 'function') ? getTrackAuthor(tr) : null;
+  const langLabel = tr.lang ? (LANG_LABELS[tr.lang] || tr.lang) : null;
+  let rows = '';
+  rows += '<div class="td-row"><span class="td-k">Artiste</span><span class="td-v">'+esc(tr.a||'—')+'</span></div>';
+  rows += '<div class="td-row"><span class="td-k">Durée</span><span class="td-v">'+esc(tr.d||'?:??')+'</span></div>';
+  rows += '<div class="td-row"><span class="td-k">Formule</span><span class="td-v"><span class="td-form" style="background:'+sty.bg+';color:'+sty.tc+'">'+esc(sty.label||tr.s)+'</span></span></div>';
+  if(langLabel) rows += '<div class="td-row"><span class="td-k">Langue</span><span class="td-v">'+esc(langLabel)+'</span></div>';
+  if(tr.n) rows += '<div class="td-row"><span class="td-k">Note</span><span class="td-v">'+esc(tr.n)+'</span></div>';
+  if(author) rows += '<div class="td-row"><span class="td-k">Ajouté par</span><span class="td-v">'+esc(author.name)+'</span></div>';
+
+  const content = document.getElementById('td-content');
+  content.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:1rem;padding-bottom:.8rem;border-bottom:3px solid '+sty.color+'">'
+      +'<h2 style="margin:0">'+esc(tr.t)+'</h2>'
+    +'</div>'
+    + rows
+    + '<div class="td-actions" id="td-actions"></div>';
+
+  // bouton fermer (dans le header)
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'btn'; closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'padding:6px 12px;flex-shrink:0';
+  closeBtn.addEventListener('click', closeTrackDetail);
+  content.querySelector('h2').insertAdjacentElement('afterend', closeBtn);
+
+  // actions
+  const act = document.getElementById('td-actions');
+  const partBtn = document.createElement('button');
+  partBtn.className = 'btn'; partBtn.textContent = '🎼 Partition / paroles';
+  partBtn.addEventListener('click', () => { closeTrackDetail(); openPart(tr); });
+  act.appendChild(partBtn);
+  if(me){
+    const edBtn = document.createElement('button');
+    edBtn.className = 'btn'; edBtn.textContent = '✏️ Modifier';
+    edBtn.addEventListener('click', () => { closeTrackDetail(); openEdit(tr.id); });
+    act.appendChild(edBtn);
+  }
+  ov.style.display = 'flex';
+};
+window.closeTrackDetail = function(){ const ov=document.getElementById('tdetail-ov'); if(ov) ov.style.display='none'; };
+
 document.getElementById('edit-ov').addEventListener('click', e => {
   if(e.target === document.getElementById('edit-ov')) closeEdit();
 });
@@ -2653,7 +2716,7 @@ function buildSetlists(){
         : '';
       el.innerHTML = '<div class="trow">'
         +'<span class="tnum">'+(i+1)+'</span>'
-        +'<div class="tinfo">'
+        +'<div class="tinfo" data-detail="'+tr.id+'">'
           +'<div class="tt">'+medleyTag+authorTag+(medleyTag||authorTag?' ':'')+esc(tr.t)+'</div>'
           +'<div class="ta2">'+esc(tr.a)+'</div>'
           +(tr.n?'<div class="tnote">'+esc(tr.n)+'</div>':'')
@@ -2676,6 +2739,7 @@ function buildSetlists(){
     const tr=allTracks().find(t=>t.id===b.dataset.part);
     if(tr) openPart(tr);
   }));
+  main.querySelectorAll('[data-detail]').forEach(el=>el.addEventListener('click',()=>openTrackDetail(el.dataset.detail)));
   main.querySelectorAll('[data-genre-change]').forEach(sel=>{
     sel.addEventListener('change', e => changeTrackGenre(sel.dataset.genreChange, e.target.value));
     sel.addEventListener('click', e => e.stopPropagation());
@@ -3411,7 +3475,7 @@ onValue(ref(db,'styles'),     snap=>{
 // ── ESC ───────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if(e.key!=='Escape') return;
-  ['mo-ov','add-ov','edit-ov','part-ov','concert-ov','cdetail-ov','picker-ov','genre-ov'].forEach(id=>{
+  ['mo-ov','add-ov','edit-ov','part-ov','concert-ov','cdetail-ov','picker-ov','genre-ov','tdetail-ov'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.style.display = 'none';
   });
