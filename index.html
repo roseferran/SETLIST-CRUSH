@@ -313,7 +313,8 @@ main{max-width:960px;margin:0 auto;padding:2rem}
 .cd-num-input{width:44px;padding:5px 4px;border:1px solid var(--border);border-radius:6px;text-align:center;font-family:'DM Serif Display',serif;font-size:1.1rem;background:#fff;color:var(--ink);-moz-appearance:textfield;transition:border-color .15s}
 .cd-num-input:focus{border-color:var(--ink);outline:none;background:var(--cream)}
 .cd-num-input::-webkit-inner-spin-button,.cd-num-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.cd-info{min-width:0}
+.cd-info{min-width:0;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,.06)}
+.cd-info:active{opacity:.6}
 .cd-tt{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cd-ta{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cd-dur{font-size:12px;color:var(--muted);white-space:nowrap}
@@ -3056,7 +3057,7 @@ function renderConcertDetail(){
       el.innerHTML =
         dragHandle
         + numCell
-        +'<div class="cd-info">'
+        +'<div class="cd-info" data-detail="'+tr.id+'">'
           +'<div class="cd-tt">'+flag+esc(tr.t)+'</div>'
           +'<div class="cd-ta">'+esc(tr.a)+'</div>'
         +'</div>'
@@ -3083,6 +3084,9 @@ function renderConcertDetail(){
   }
   footer.innerHTML = '<span>'+trackIds.length+' titre'+(trackIds.length>1?'s':'')+langStr+'</span><span>Durée totale : <strong'+(ccolor?' style="color:'+ccolor+'"':'')+'>'+fl(total)+'</strong></span>';
   wrap.appendChild(footer);
+
+  // Appui sur le titre → fiche détail (pour tous)
+  list.querySelectorAll('[data-detail]').forEach(el=>el.addEventListener('click',()=>openTrackDetail(el.dataset.detail)));
 
   if(adminUser){
     // Remove button
